@@ -13,7 +13,10 @@ marca-texto. Faixas de catálogo em mono, fios pretos separando seções, conte�
 (recursos, como tracklist) e **Lado B** (instalação).
 
 **Assinatura:** o marca-texto vermilion atrás da linha atual — é a própria mecânica do app (fundo só sob a
-linha em destaque), repetida na demo do hero e no hover da tracklist.
+linha em destaque), repetida no hover da tracklist.
+
+**Demo do hero:** o ícone animado. O disco gira a 33⅓ rpm (só os sulcos; o reflexo fica parado) e as
+barras do selo sobem como linhas de letra, com a do centro em destaque.
 
 ## Tipografia
 - Display: **Gambetta** (Fontshare) — serifa editorial, itálico no hero.
@@ -35,7 +38,7 @@ linha em destaque), repetida na demo do hero e no hover da tracklist.
 - Raios: 0 (caixas, fios) e pílula (botões, selos "Lado A/B").
 - Sem sombras: bordas definidas (fios de 1–2px).
 - Botões ranqueados: primário tinta cheia, secundário contorno. Mínimo 48px de altura.
-- Movimento: ease-out; demo troca de linha a cada 2,4s; tudo desligado com `prefers-reduced-motion`.
+- Movimento: ease-out; o selo troca de linha a cada 2,4s; tudo desligado com `prefers-reduced-motion`.
 - Sem modo escuro: é papel impresso, de propósito.
 
 ## Downloads
@@ -48,3 +51,4 @@ boilerplate de 3 cards). Foco visível, alvos ≥ 24px, sem cor como único sina
 
 ## Changelog
 - 2026-09-23 — versão inicial.
+- 2026-09-29 — demo do hero trocada pelo ícone animado (disco girando, selo com linhas de letra).

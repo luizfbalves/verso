@@ -1,50 +1,36 @@
-// Demo: repete a mecânica do overlay — a linha atual centralizada e destacada.
-// Letras de exemplo inventadas, uma por idioma do site.
-const DEMO = {
-  pt: [
-    "Acendo a luz da cozinha",
-    "o rádio ainda sabe o teu nome",
-    "a cidade inteira fica quieta",
-    "só pra ouvir o refrão passar",
-    "e eu canto baixo, sem saber",
-    "até a letra aparecer pra mim",
-  ],
-  en: [
-    "I leave the kitchen light on",
-    "the radio still knows your name",
-    "the whole town goes quiet",
-    "just to hear the chorus pass",
-    "and I sing low, not knowing",
-    "until the words show up for me",
-  ],
-};
-const LINES = document.documentElement.lang.startsWith("pt") ? DEMO.pt : DEMO.en;
+// Demo: o selo do disco repete a mecânica do overlay — a linha atual centralizada e destacada.
+// Larguras em % do selo, como linhas de letra de tamanhos diferentes.
+const WIDTHS = [46, 62, 77, 40, 58, 70, 50, 66];
 
-const track = document.getElementById("demo-track");
-const screen = track.parentElement.parentElement;
-const els = LINES.map((t) => {
-  const el = document.createElement("span");
-  el.className = "demo-line";
-  el.textContent = t;
+const track = document.getElementById("label-track");
+const label = track.parentElement.parentElement;
+const bars = WIDTHS.map((w) => {
+  const el = document.createElement("div");
+  el.className = "label-bar";
+  el.style.width = `${w}%`;
   track.append(el);
   return el;
 });
 
-let i = 0;
+let i = 2;
 function show() {
-  els.forEach((el, k) => el.classList.toggle("cur", k === i));
-  const el = els[i];
-  const ty = screen.clientHeight / 2 - (el.offsetTop + el.offsetHeight / 2);
+  bars.forEach((el, k) => el.classList.toggle("cur", k === i));
+  // Centraliza pela posição final da barra (alturas mudam com transição, então calcula pelo CSS alvo).
+  const cs = getComputedStyle(label);
+  const unit = parseFloat(cs.width) / 100;
+  const h = (k) => (k === i ? 11.5 : 6.2) * unit;
+  let top = 0;
+  for (let k = 0; k < i; k++) top += h(k) + 8 * unit;
+  const ty = label.clientHeight / 2 - (top + h(i) / 2);
   track.style.transform = `translateY(${ty}px)`;
 }
 show();
-document.fonts?.ready.then(show);
-new ResizeObserver(show).observe(screen);
+new ResizeObserver(show).observe(label);
 
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 if (!reduced) {
   setInterval(() => {
-    i = (i + 1) % LINES.length;
+    i = (i + 1) % bars.length;
     show();
   }, 2400);
 }

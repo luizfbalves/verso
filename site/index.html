@@ -60,12 +60,24 @@
           </p>
         </div>
 
-        <figure class="demo" aria-label="Demonstração: a linha atual da letra fica destacada enquanto a música toca">
-          <div class="demo-screen">
-            <div class="demo-fade"><div class="demo-track" id="demo-track"></div></div>
+        <figure class="demo" aria-label="Demonstração: o disco gira e a linha em destaque no selo avança, como a letra no app">
+          <div class="disc" aria-hidden="true">
+            <svg class="disc-grooves" viewBox="0 0 640 640">
+              <g fill="none" stroke="#efefe9" stroke-opacity=".08" stroke-width="2">
+                <circle cx="320" cy="320" r="300"/><circle cx="320" cy="320" r="282"/><circle cx="320" cy="320" r="264"/>
+                <circle cx="320" cy="320" r="246"/><circle cx="320" cy="320" r="228"/><circle cx="320" cy="320" r="210"/>
+                <circle cx="320" cy="320" r="192"/><circle cx="320" cy="320" r="174"/><circle cx="320" cy="320" r="156"/>
+              </g>
+              <g fill="none" stroke="#efefe9" stroke-linecap="round" stroke-width="3">
+                <circle cx="320" cy="320" r="291" stroke-opacity=".16" stroke-dasharray="120 1709"/>
+                <circle cx="320" cy="320" r="237" stroke-opacity=".12" stroke-dasharray="70 1419" stroke-dashoffset="-700"/>
+                <circle cx="320" cy="320" r="183" stroke-opacity=".14" stroke-dasharray="90 1060" stroke-dashoffset="-300"/>
+              </g>
+            </svg>
+            <div class="disc-label"><div class="label-window"><div class="label-track" id="label-track"></div></div></div>
           </div>
           <figcaption>
-            <span>Fig. 1</span> A linha atual ganha destaque; as outras esmaecem. Letra de exemplo, inventada.
+            <span>Fig. 1</span> O disco gira, a letra avança: a linha atual ganha destaque e as outras esmaecem.
           </figcaption>
         </figure>
       </section>
