@@ -103,9 +103,7 @@ fn set_edit(app: &AppHandle, on: bool) {
     let _ = app.emit("edit-mode", json!({ "on": on }));
 }
 
-/// Se o overlay estiver em modo de edição (ex.: ao sair pelo menu "Sair"), salva a posição
-/// atual da janela na config antes de encerrar — mesmo caminho usado por `toggle_edit` ao
-/// desligar o modo de edição.
+/// Para o "Sair": no modo de edição a posição arrastada ainda não foi gravada.
 pub fn save_position_if_editing(app: &AppHandle) {
     let st = app.state::<AppState>();
     if st.edit_mode.load(Ordering::SeqCst) {

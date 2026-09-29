@@ -8,7 +8,7 @@ pub const PROXY_URL: &str = "https://verso-translate.luizzbanndera.workers.dev";
 pub const ENABLED: bool = !PROXY_URL.is_empty();
 
 /// Chave HMAC que assina os pedidos ao proxy (secret VERSO_SIGNING_KEY no CI, SIGNING_KEY no
-/// Worker). Build local sem ela manda pedidos sem assinatura.
+/// Worker). Build local sem ela fica sem tradução: o proxy recusa pedido sem assinatura.
 pub const SIGNING_KEY: &str = match option_env!("VERSO_SIGNING_KEY") {
     Some(k) => k,
     None => "",

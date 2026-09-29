@@ -15,7 +15,6 @@ pub enum TranslateStatus {
     QuotaExceeded,
 }
 
-/// Com a cota do mês esgotada no proxy, espera esse tempo antes de tentar de novo.
 const QUOTA_RETRY: Duration = Duration::from_secs(3600);
 
 #[derive(Debug, Clone)]

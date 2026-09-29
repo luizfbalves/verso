@@ -20,7 +20,6 @@ struct Resp {
     source: String,
 }
 
-/// Cliente do proxy de tradução do Verso (Cloudflare Worker na frente da Azure Translator).
 pub struct ProxyTranslator {
     http: reqwest::Client,
     base: String,

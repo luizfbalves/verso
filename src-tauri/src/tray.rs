@@ -17,8 +17,6 @@ pub struct TrayHandles {
     pub modes: Vec<(Mode, CheckMenuItem<Wry>)>,
 }
 
-/// O menu é declarado aqui como lista: para adicionar opções futuras, inclua uma entrada
-/// e trate o `id` em `handle`.
 enum Entry {
     TrackTitle,
     Separator,
