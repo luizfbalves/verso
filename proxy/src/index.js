@@ -12,6 +12,9 @@ export const MAX_LINES = 400;
 export const MAX_LINE_CHARS = 300;
 export const MAX_TOTAL_CHARS = 10_000;
 const CACHE_TTL_S = 365 * 24 * 3600;
+// Tolerância para relógio desajustado no PC do usuário. Reenviar um pedido capturado dentro da
+// janela não custa cota: o mesmo corpo cai no cache.
+export const SIG_WINDOW_S = 300;
 
 const json = (status, body) =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json; charset=utf-8" } });
@@ -47,6 +50,25 @@ export function dominant(langs) {
   return best;
 }
 
+const fromHex = (hex) =>
+  /^([0-9a-f]{2})+$/.test(hex) ? new Uint8Array(hex.match(/../g).map((b) => parseInt(b, 16))) : null;
+
+/**
+ * Confere `x-verso-sig` = hex(HMAC-SHA256(chave, "<x-verso-ts>.<corpo>")), a mesma conta que o app
+ * faz (src-tauri/src/translate/proxy.rs). Não segura quem extrair a chave do binário, só scripts
+ * que acharam a URL.
+ */
+export async function signed(request, raw, key, now) {
+  const ts = Number(request.headers.get("x-verso-ts"));
+  const sig = fromHex(request.headers.get("x-verso-sig") ?? "");
+  if (!Number.isInteger(ts) || !sig || Math.abs(now.getTime() / 1000 - ts) > SIG_WINDOW_S) return false;
+  const enc = new TextEncoder();
+  const k = await crypto.subtle.importKey("raw", enc.encode(key), { name: "HMAC", hash: "SHA-256" }, false, [
+    "verify",
+  ]);
+  return crypto.subtle.verify("HMAC", k, sig, enc.encode(`${ts}.${raw}`));
+}
+
 async function bump(kv, key, by, ttl) {
   const n = Number((await kv.get(key)) ?? 0) + by;
   await kv.put(key, String(n), ttl ? { expirationTtl: ttl } : undefined);
@@ -55,7 +77,8 @@ async function bump(kv, key, by, ttl) {
 /**
  * @param {Request} request
  * @param {{ CACHE: KVNamespace, LIMITER?: RateLimit, AZURE_KEY: string, AZURE_REGION: string,
- *           MONTHLY_BUDGET?: string, IP_DAILY_CHARS?: string }} env
+ *           MONTHLY_BUDGET?: string, IP_DAILY_CHARS?: string, SIGNING_KEY?: string,
+ *           REQUIRE_SIGNATURE?: string }} env
  * @param {{ fetch?: typeof fetch, now?: Date }} [deps] injetáveis nos testes
  */
 export async function handle(request, env, deps = {}) {
@@ -71,9 +94,15 @@ export async function handle(request, env, deps = {}) {
     return json(429, { error: "rate_limited" });
   }
 
+  const raw = await request.text();
+  // Enquanto a v0.3.0 (que não assina) estiver em uso, REQUIRE_SIGNATURE fica "false".
+  if (env.REQUIRE_SIGNATURE === "true" && !(env.SIGNING_KEY && (await signed(request, raw, env.SIGNING_KEY, now)))) {
+    return json(401, { error: "unauthorized" });
+  }
+
   let body;
   try {
-    body = await request.json();
+    body = JSON.parse(raw);
   } catch {
     return json(400, { error: "bad_request", detail: "JSON inválido" });
   }
@@ -92,7 +121,7 @@ export async function handle(request, env, deps = {}) {
   const monthKey = `usage:${month}`;
   const ipKey = `ip:${day}:${await sha256(ip)}`;
   const budget = Number(env.MONTHLY_BUDGET ?? 1_900_000);
-  const ipDaily = Number(env.IP_DAILY_CHARS ?? 60_000);
+  const ipDaily = Number(env.IP_DAILY_CHARS ?? 20_000);
   const [used, ipUsed] = await Promise.all([env.CACHE.get(monthKey), env.CACHE.get(ipKey)]);
   if (Number(used ?? 0) + chars > budget) return json(503, { error: "quota_exceeded" });
   if (Number(ipUsed ?? 0) + chars > ipDaily) return json(429, { error: "rate_limited" });

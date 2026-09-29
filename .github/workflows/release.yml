@@ -34,6 +34,9 @@ jobs:
           - args: --target x86_64-apple-darwin
             rust_target: x86_64-apple-darwin
     runs-on: macos-latest
+    env:
+      # Embutida no binário (option_env!) para assinar os pedidos ao proxy de tradução.
+      VERSO_SIGNING_KEY: ${{ secrets.VERSO_SIGNING_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -61,6 +64,7 @@ jobs:
       # Enquanto o projeto não estiver aprovado no SignPath (secret ausente), os
       # instaladores saem sem assinatura, como antes.
       SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+      VERSO_SIGNING_KEY: ${{ secrets.VERSO_SIGNING_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

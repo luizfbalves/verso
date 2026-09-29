@@ -5,7 +5,7 @@ compartilhado (música popular é traduzida uma vez só para todos) e segura a c
 (2M caracteres/mês) com três limites:
 
 - teto mensal global (`MONTHLY_BUDGET`, 1,9M: os contadores no KV são aproximados);
-- caracteres novos por IP por dia (`IP_DAILY_CHARS`, 60 mil, umas 30 músicas);
+- caracteres novos por IP por dia (`IP_DAILY_CHARS`, 20 mil, umas 10 músicas; cache não conta);
 - requisições por IP por minuto (rate limiter do Cloudflare, 30/min).
 
 Com a cota esgotada, o proxy responde `503 {"error":"quota_exceeded"}` e o app mostra só a letra
@@ -16,6 +16,18 @@ original, tentando de novo a cada hora.
 `POST /v1/translate` com `{"to": "pt", "lines": ["...", "..."]}` responde
 `{"lines": ["...", "..."], "source": "ja"}`. Linhas vazias não são aceitas: o app filtra antes.
 
+## Assinatura
+
+O app assina cada pedido com HMAC-SHA256 numa chave embutida no binário na build do CI
+(secret `VERSO_SIGNING_KEY` no GitHub; a mesma chave vai no secret `SIGNING_KEY` do Worker):
+
+- `x-verso-ts`: horário Unix em segundos (aceito com até 5 min de diferença);
+- `x-verso-sig`: `hex(HMAC-SHA256(chave, "<x-verso-ts>.<corpo>"))`.
+
+Com `REQUIRE_SIGNATURE = "true"` no `wrangler.toml`, pedido sem assinatura válida leva `401`. Fica
+`"false"` enquanto versões que não assinam (até a v0.3.0) estiverem em uso. Não segura quem extrair
+a chave do binário, só quem achou a URL.
+
 ## Deploy
 
 1. **Azure**: no [portal](https://portal.azure.com), crie um recurso **Translator** com o tipo de preço
@@ -25,6 +37,7 @@ original, tentando de novo a cada hora.
    npx wrangler login
    npx wrangler kv namespace create CACHE   # copie o id para o wrangler.toml
    npx wrangler secret put AZURE_KEY        # cole a Key 1
+   npx wrangler secret put SIGNING_KEY      # mesma chave do secret VERSO_SIGNING_KEY do GitHub
    ```
    Se a região não for `brazilsouth`, ajuste `AZURE_REGION` no `wrangler.toml`.
 3. `npm run deploy`. O comando imprime a URL, algo como `https://verso-translate.<conta>.workers.dev`.
