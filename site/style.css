@@ -395,6 +395,28 @@ h3 {
 }
 .steps li::before { content: counter(st) "."; font: 500 var(--t-md) / 1.2 var(--f-display); color: var(--spot); }
 code { font: 400 0.9em var(--f-mono); background: var(--paper-2); padding: 1px 4px; }
+.steps li > .gk { grid-column: 2; }
+/* Réplica do trecho de Ajustes do Sistema, desenhada no estilo do encarte; o marca-texto aponta o botão. */
+.gk {
+  display: grid;
+  gap: calc(var(--s) * 1);
+  margin-top: calc(var(--s) * 1.5);
+  padding: calc(var(--s) * 1.5);
+  border: 1.5px solid var(--ink);
+  font-size: var(--t-sm);
+  line-height: 1.35;
+}
+.gk-title { font: 500 var(--t-xs) / 1 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.gk-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: calc(var(--s) * 1.5); }
+.gk-btn {
+  flex: none;
+  padding: 4px 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  background: var(--spot);
+  font-weight: 500;
+  white-space: nowrap;
+}
 
 /* ---- colofão ---- */
 .colophon {
