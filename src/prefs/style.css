@@ -26,7 +26,10 @@ button[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 
 .sw button { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line); cursor: pointer; padding: 0; }
 .sw button.none { background: var(--surface); color: var(--muted); font-size: 12px; }
 .sw input[type="color"] { width: 28px; height: 26px; border: 0; background: none; padding: 0; cursor: pointer; }
-.range { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.toggle { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 12px; cursor: pointer; }
+.toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+#tr-opts[hidden] { display: none; }
+.range {display: flex; align-items: center; gap: 8px; color: var(--muted); }
 input[type="password"], select { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
 .btn { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }

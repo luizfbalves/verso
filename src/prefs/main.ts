@@ -18,6 +18,8 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 
 let appearance: Appearance = { ...DEFAULT_APPEARANCE };
 let translation: TranslationCfg = { mode: "original", target_lang: "PT-BR" };
+// Modo que volta quando a tradução é religada.
+let lastOnMode: Mode = "both";
 let saveTimer: number | undefined;
 
 function saveAppearance() {
@@ -72,6 +74,23 @@ function renderAppearance() {
   $("bg-opv").textContent = `${appearance.bg_opacity}%`;
 }
 
+function setTranslation(patch: Partial<TranslationCfg>) {
+  translation = { ...translation, ...patch };
+  renderTranslation();
+  void invoke("set_translation", { translation });
+}
+
+function renderTranslation() {
+  const on = translation.mode !== "original";
+  if (on) lastOnMode = translation.mode;
+  $<HTMLInputElement>("tr-on").checked = on;
+  $("tr-opts").hidden = !on;
+  $<HTMLSelectElement>("lang").value = translation.target_lang;
+  document.querySelectorAll<HTMLButtonElement>("#modes button").forEach((b) =>
+    b.setAttribute("aria-pressed", String(b.dataset.mode === translation.mode)),
+  );
+}
+
 function renderStatus(status: TranslateStatus) {
   const warn = $("warn");
   const msg: Record<TranslateStatus, string> = {
@@ -97,10 +116,13 @@ function wire() {
   $<HTMLInputElement>("bg-op").oninput = (e) => setAppearance({ bg_opacity: Number((e.target as HTMLInputElement).value) });
   $("reset").onclick = () => setAppearance({ ...DEFAULT_APPEARANCE });
 
-  $<HTMLSelectElement>("lang").onchange = (e) => {
-    translation = { ...translation, target_lang: (e.target as HTMLSelectElement).value as TargetLang };
-    void invoke("set_translation", { translation });
-  };
+  $<HTMLInputElement>("tr-on").onchange = (e) =>
+    setTranslation({ mode: (e.target as HTMLInputElement).checked ? lastOnMode : "original" });
+  $<HTMLSelectElement>("lang").onchange = (e) =>
+    setTranslation({ target_lang: (e.target as HTMLSelectElement).value as TargetLang });
+  document.querySelectorAll<HTMLButtonElement>("#modes button").forEach((b) => {
+    b.onclick = () => setTranslation({ mode: b.dataset.mode as Mode });
+  });
 
   $("bmc").onclick = () => invoke("open_link", { link: "support" }).catch((err) => console.error(err));
   $<HTMLImageElement>("bmc-img").src = bmcButton;
@@ -111,7 +133,7 @@ async function main() {
   wire();
   await listen<{ mode: Mode; target_lang: TargetLang }>("mode-changed", (e) => {
     translation = { mode: e.payload.mode, target_lang: e.payload.target_lang };
-    $<HTMLSelectElement>("lang").value = translation.target_lang;
+    renderTranslation();
   });
   await listen<TranslateStatus>("translate-status", (e) => renderStatus(e.payload));
 
@@ -119,7 +141,7 @@ async function main() {
   appearance = s.appearance;
   translation = s.translation;
   $("translation").hidden = !s.translation_enabled;
-  $<HTMLSelectElement>("lang").value = translation.target_lang;
+  renderTranslation();
   renderAppearance();
   renderStatus(s.translate_status);
 }

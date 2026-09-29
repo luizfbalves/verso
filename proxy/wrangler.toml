@@ -10,7 +10,7 @@ IP_DAILY_CHARS = "60000"          # ~30 músicas novas por dia por IP
 # Criado com `npx wrangler kv namespace create CACHE`; troque pelo id que o comando imprimir.
 [[kv_namespaces]]
 binding = "CACHE"
-id = "COLOQUE_O_ID_DO_KV_AQUI"
+id = "ae31a6b56993409c8db31ca3d0413b8a"
 
 [[ratelimits]]
 name = "LIMITER"

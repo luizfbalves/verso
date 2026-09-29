@@ -4,7 +4,7 @@ pub mod service;
 
 /// Proxy de tradução (proxy/, Cloudflare Worker na frente da Azure Translator).
 /// Vazio = tradução oculta: o app mostra só a letra original.
-pub const PROXY_URL: &str = "";
+pub const PROXY_URL: &str = "https://verso-translate.luizzbanndera.workers.dev";
 pub const ENABLED: bool = !PROXY_URL.is_empty();
 
 use async_trait::async_trait;

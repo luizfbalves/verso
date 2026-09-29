@@ -48,17 +48,27 @@
 
       <section id="translation" hidden>
         <h2>Tradução</h2>
-        <div class="field">
-          <label class="lbl" for="lang">Traduzir para</label>
-          <select id="lang">
-            <option value="PT-BR">Português (Brasil)</option>
-            <option value="EN-US">Inglês (EUA)</option>
-            <option value="ES">Espanhol</option>
-          </select>
+        <label class="toggle"><input type="checkbox" id="tr-on" /> Traduzir a letra</label>
+        <div id="tr-opts">
+          <div class="field">
+            <label class="lbl" for="lang">Traduzir para</label>
+            <select id="lang">
+              <option value="PT-BR">Português (Brasil)</option>
+              <option value="EN-US">Inglês (EUA)</option>
+              <option value="ES">Espanhol</option>
+            </select>
+          </div>
+          <div class="field">
+            <span class="lbl">Mostrar</span>
+            <div class="seg" id="modes">
+              <button data-mode="both">Original + tradução</button>
+              <button data-mode="translated">Só tradução</button>
+            </div>
+          </div>
         </div>
         <p class="note">
-          Ligue a tradução no menu do Verso, em <strong>Tradução</strong>. As linhas da letra passam pelo
-          servidor do Verso e são traduzidas pelo Microsoft Translator.
+          Com a tradução ligada, as linhas da letra passam pelo servidor do Verso e são traduzidas pelo
+          Microsoft Translator.
         </p>
         <p class="warn" id="warn" hidden></p>
       </section>
