@@ -24,9 +24,8 @@ O app assina cada pedido com HMAC-SHA256 numa chave embutida no binário na buil
 - `x-verso-ts`: horário Unix em segundos (aceito com até 5 min de diferença);
 - `x-verso-sig`: `hex(HMAC-SHA256(chave, "<x-verso-ts>.<corpo>"))`.
 
-Com `REQUIRE_SIGNATURE = "true"` no `wrangler.toml`, pedido sem assinatura válida leva `401`. Fica
-`"false"` enquanto versões que não assinam (até a v0.3.0) estiverem em uso. Não segura quem extrair
-a chave do binário, só quem achou a URL.
+Pedido sem assinatura válida leva `401`. Não segura quem extrair a chave do binário, só quem achou
+a URL. Build local do app sem `VERSO_SIGNING_KEY` no ambiente fica sem tradução.
 
 ## Deploy
 

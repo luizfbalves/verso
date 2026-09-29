@@ -77,8 +77,7 @@ async function bump(kv, key, by, ttl) {
 /**
  * @param {Request} request
  * @param {{ CACHE: KVNamespace, LIMITER?: RateLimit, AZURE_KEY: string, AZURE_REGION: string,
- *           MONTHLY_BUDGET?: string, IP_DAILY_CHARS?: string, SIGNING_KEY?: string,
- *           REQUIRE_SIGNATURE?: string }} env
+ *           MONTHLY_BUDGET?: string, IP_DAILY_CHARS?: string, SIGNING_KEY: string }} env
  * @param {{ fetch?: typeof fetch, now?: Date }} [deps] injetáveis nos testes
  */
 export async function handle(request, env, deps = {}) {
@@ -95,8 +94,7 @@ export async function handle(request, env, deps = {}) {
   }
 
   const raw = await request.text();
-  // Enquanto a v0.3.0 (que não assina) estiver em uso, REQUIRE_SIGNATURE fica "false".
-  if (env.REQUIRE_SIGNATURE === "true" && !(env.SIGNING_KEY && (await signed(request, raw, env.SIGNING_KEY, now)))) {
+  if (!env.SIGNING_KEY || !(await signed(request, raw, env.SIGNING_KEY, now))) {
     return json(401, { error: "unauthorized" });
   }
 
