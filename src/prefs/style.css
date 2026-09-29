@@ -36,6 +36,7 @@ input[type="password"], select { font: inherit; padding: 6px 8px; border: 1px so
 a { color: var(--accent); }
 .note { color: var(--muted); margin: 4px 0; }
 .warn { color: var(--warn); margin: 4px 0; }
+.warn a { color: inherit; text-decoration: underline; }
 small { color: var(--muted); }
 footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-top: 1px solid var(--line); background: var(--surface); }
 .bmc { border: 0; background: none; padding: 0; cursor: pointer; }

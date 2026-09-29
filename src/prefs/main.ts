@@ -91,14 +91,28 @@ function renderTranslation() {
   );
 }
 
+function openSupport() {
+  invoke("open_link", { link: "support" }).catch((err) => console.error(err));
+}
+
 function renderStatus(status: TranslateStatus) {
   const warn = $("warn");
-  const msg: Record<TranslateStatus, string> = {
-    ok: "",
-    quota_exceeded: "A cota grátis de tradução deste mês acabou. Mostrando só a letra original até o mês virar.",
-  };
-  warn.textContent = msg[status];
+  warn.replaceChildren();
   warn.hidden = status === "ok";
+  if (status !== "quota_exceeded") return;
+  const coffee = document.createElement("a");
+  coffee.href = "#";
+  coffee.textContent = "me pagando um cafezinho";
+  coffee.onclick = (e) => {
+    e.preventDefault();
+    openSupport();
+  };
+  warn.append(
+    "A cota grátis de tradução deste mês acabou. Mostrando só a letra original até o mês virar. " +
+      "Quer mais traduções? Considere apoiar o projeto ",
+    coffee,
+    ".",
+  );
 }
 
 function wire() {
@@ -124,7 +138,7 @@ function wire() {
     b.onclick = () => setTranslation({ mode: b.dataset.mode as Mode });
   });
 
-  $("bmc").onclick = () => invoke("open_link", { link: "support" }).catch((err) => console.error(err));
+  $("bmc").onclick = openSupport;
   $<HTMLImageElement>("bmc-img").src = bmcButton;
 }
 
