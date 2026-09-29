@@ -2,7 +2,7 @@
 
 [English](README.md) | Português
 
-App gratuito para macOS e Windows que mostra a letra sincronizada da música que toca no Spotify, flutuando sobre qualquer janela.
+App gratuito para macOS e Windows que mostra a letra sincronizada da música que toca no Spotify (ou no YouTube Music, no Windows), flutuando sobre qualquer janela.
 
 Site e downloads: https://luizfbalves.github.io/verso/ (English: https://luizfbalves.github.io/verso/en/)
 
@@ -37,7 +37,7 @@ Este programa não transfere nenhuma informação para outros sistemas em rede, 
 
 Para funcionar, o Verso faz as seguintes requisições:
 
-- **LRCLIB** (https://lrclib.net): título, artista, álbum e duração da faixa tocando no Spotify, para buscar a letra sincronizada.
+- **LRCLIB** (https://lrclib.net): título, artista, álbum e duração da faixa tocando no Spotify ou no YouTube Music, para buscar a letra sincronizada.
 - **Servidor de tradução do Verso** ([proxy/](proxy/), um Cloudflare Worker): só se o usuário ativar a tradução. As linhas da letra são repassadas ao Microsoft Azure Translator e o resultado fica num cache compartilhado sem identificadores de usuário. O IP do cliente é usado só para limitar a taxa de uso, com hash, em contadores que expiram em até dois dias.
 
 Nenhum dado de analytics ou telemetria é coletado.

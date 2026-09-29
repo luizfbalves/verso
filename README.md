@@ -2,7 +2,7 @@
 
 English | [Português](README.pt-BR.md)
 
-Free app for macOS and Windows that shows synced lyrics for the song playing on Spotify, floating over any window.
+Free app for macOS and Windows that shows synced lyrics for the song playing on Spotify (or YouTube Music, on Windows), floating over any window.
 
 Website and downloads: https://luizfbalves.github.io/verso/en/ (Português: https://luizfbalves.github.io/verso/)
 
@@ -37,7 +37,7 @@ This program will not transfer any information to other networked systems unless
 
 To do its job, Verso sends the following requests:
 
-- **LRCLIB** (https://lrclib.net): the title, artist, album and duration of the track playing in Spotify, to fetch synced lyrics.
+- **LRCLIB** (https://lrclib.net): the title, artist, album and duration of the track playing in Spotify or YouTube Music, to fetch synced lyrics.
 - **Verso translation server** ([proxy/](proxy/), a Cloudflare Worker): only if the user turns on translation. The lyric lines are forwarded to Microsoft Azure Translator and the result is kept in a shared cache with no user identifiers. The client IP is used only for rate limiting, hashed, in counters that expire within two days.
 
 No analytics or telemetry is collected.

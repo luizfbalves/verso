@@ -62,6 +62,39 @@ pub fn smtc_elapsed_ms(universal_time: i64, now_unix_ms: u64) -> u64 {
     (now_unix_ms as i64 - then_unix_ms).max(0) as u64
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SmtcSource {
+    Spotify,
+    Browser,
+}
+
+/// Classifica uma sessão do SMTC pelo AppUserModelId. Navegadores entram por causa do YouTube Music
+/// (aba ou PWA); o AUMID do Firefox é um hash fixo em vez do nome.
+pub fn smtc_source(app_id: &str) -> Option<SmtcSource> {
+    const BROWSERS: [&str; 7] = ["chrome", "msedge", "firefox", "308046b0af4a39cb", "brave", "opera", "vivaldi"];
+    let id = app_id.to_lowercase();
+    if id.contains("spotify") {
+        Some(SmtcSource::Spotify)
+    } else if BROWSERS.iter().any(|b| id.contains(b)) {
+        Some(SmtcSource::Browser)
+    } else {
+        None
+    }
+}
+
+/// Escolhe a sessão a sincronizar: a que está tocando ganha, e no empate o Spotify ganha.
+/// De navegador só vale faixa com álbum e duração: o YouTube comum não preenche o álbum
+/// (o "artista" é o canal), e sem duração não dá para achar a letra nem sincronizar.
+pub fn pick_smtc(candidates: Vec<(SmtcSource, NowPlaying)>) -> Option<NowPlaying> {
+    candidates
+        .into_iter()
+        .filter(|(src, np)| {
+            *src == SmtcSource::Spotify || (!np.album.trim().is_empty() && !np.artist.trim().is_empty() && np.duration_ms > 0)
+        })
+        .min_by_key(|(src, np)| (!np.is_playing, *src != SmtcSource::Spotify))
+        .map(|(_, np)| np)
+}
+
 #[cfg(target_os = "macos")]
 pub fn system_player() -> std::sync::Arc<dyn Player> {
     std::sync::Arc::new(macos::MacSpotifyPlayer)
@@ -89,5 +122,47 @@ mod tests {
         assert_eq!(smtc_elapsed_ms(WIN_TICKS, UNIX_MS + 2_500), 2_500);
         // relógio "voltou": nunca negativo
         assert_eq!(smtc_elapsed_ms(WIN_TICKS, UNIX_MS - 1_000), 0);
+    }
+
+    fn np(title: &str, album: &str, duration_ms: u64, is_playing: bool) -> NowPlaying {
+        NowPlaying {
+            title: title.into(),
+            artist: "Artista".into(),
+            album: album.into(),
+            duration_ms,
+            position_ms: 0,
+            is_playing,
+        }
+    }
+
+    #[test]
+    fn smtc_source_por_app_id() {
+        assert_eq!(smtc_source("Spotify.exe"), Some(SmtcSource::Spotify));
+        assert_eq!(smtc_source("SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify"), Some(SmtcSource::Spotify));
+        assert_eq!(smtc_source("Chrome"), Some(SmtcSource::Browser));
+        assert_eq!(smtc_source("MSEdge"), Some(SmtcSource::Browser));
+        assert_eq!(smtc_source("308046B0AF4A39CB"), Some(SmtcSource::Browser));
+        assert_eq!(smtc_source("Chrome._crx_cinhimbnkkaeohfgghhklpknlkffjgod"), Some(SmtcSource::Browser));
+        assert_eq!(smtc_source("Microsoft.ZuneMusic_8wekyb3d8bbwe!Microsoft.ZuneMusic"), None);
+    }
+
+    #[test]
+    fn pick_smtc_prefere_quem_toca_e_depois_spotify() {
+        use SmtcSource::*;
+        let got = pick_smtc(vec![(Spotify, np("pausada", "A", 1, false)), (Browser, np("ytm", "B", 1, true))]);
+        assert_eq!(got.unwrap().title, "ytm");
+        let got = pick_smtc(vec![(Browser, np("ytm", "B", 1, true)), (Spotify, np("spotify", "A", 1, true))]);
+        assert_eq!(got.unwrap().title, "spotify");
+        let got = pick_smtc(vec![(Browser, np("ytm", "B", 1, false)), (Spotify, np("spotify", "A", 1, false))]);
+        assert_eq!(got.unwrap().title, "spotify");
+    }
+
+    #[test]
+    fn pick_smtc_ignora_navegador_sem_album_ou_duracao() {
+        use SmtcSource::*;
+        assert_eq!(pick_smtc(vec![(Browser, np("youtube", "", 1, true))]), None);
+        assert_eq!(pick_smtc(vec![(Browser, np("sem timeline", "B", 0, true))]), None);
+        let got = pick_smtc(vec![(Browser, np("youtube", "", 1, true)), (Spotify, np("spotify", "", 0, false))]);
+        assert_eq!(got.unwrap().title, "spotify");
     }
 }
