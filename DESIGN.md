@@ -15,8 +15,15 @@ marca-texto. Faixas de catálogo em mono, fios pretos separando seções, conte�
 **Assinatura:** o marca-texto vermilion atrás da linha atual — é a própria mecânica do app (fundo só sob a
 linha em destaque), repetida no hover da tracklist.
 
-**Demo do hero:** o ícone animado. O disco gira a 33⅓ rpm (só os sulcos; o reflexo fica parado) e as
-barras do selo sobem como linhas de letra, com a do centro em destaque.
+**Demo do hero:** um toca-discos. Ao aparecer na tela, o braço desce sobre o disco, o disco ganha
+velocidade até 33⅓ rpm (só os sulcos; o reflexo fica parado) e só então as barras do selo sobem como
+linhas de letra, com a do centro em destaque. O botão Pausar/Tocar levanta o braço e o disco para aos poucos.
+
+**Movimento que remete à letra (tudo é a mesma mecânica do marca-texto):**
+- Título em karaokê: o marca-texto passa palavra por palavra no carregamento; no fim só o `<em>` fica marcado.
+- Tracklist tocando: a faixa que cruza o meio da tela vira a "linha atual" (marca-texto entra da esquerda).
+- Barra de progresso: fio vermilion de 3px no topo, ligado à rolagem (a página é a faixa); só onde há
+  `animation-timeline`.
 
 ## Tipografia
 - Display: **Gambetta** (Fontshare) — serifa editorial, itálico no hero.
@@ -38,7 +45,9 @@ barras do selo sobem como linhas de letra, com a do centro em destaque.
 - Raios: 0 (caixas, fios) e pílula (botões, selos "Lado A/B").
 - Sem sombras: bordas definidas (fios de 1–2px).
 - Botões ranqueados: primário tinta cheia, secundário contorno. Mínimo 48px de altura.
-- Movimento: ease-out; o selo troca de linha a cada 2,4s; tudo desligado com `prefers-reduced-motion`.
+- Movimento: ease-out para entradas, `--ease-io` para o braço (1,1s); marca-texto entra em 450ms; o selo troca
+  de linha a cada 2,4s. Só `transform`/`opacity`. Com `prefers-reduced-motion`: braço já no disco, disco parado,
+  título já com o `<em>` marcado, sem tracklist tocando nem barra de progresso. O botão Pausar atende o WCAG 2.2.2.
 - Sem modo escuro: é papel impresso, de propósito.
 
 ## Downloads
@@ -52,3 +61,4 @@ boilerplate de 3 cards). Foco visível, alvos ≥ 24px, sem cor como único sina
 ## Changelog
 - 2026-09-23 — versão inicial.
 - 2026-09-29 — demo do hero trocada pelo ícone animado (disco girando, selo com linhas de letra).
+- 2026-09-29 — toca-discos com braço e pausar/tocar, título em karaokê, tracklist tocando na rolagem, barra de progresso.

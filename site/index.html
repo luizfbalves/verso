@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
+    <script>document.documentElement.classList.add("js");</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Verso — a letra do Spotify por cima de tudo</title>
@@ -26,6 +27,7 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <div class="playhead" aria-hidden="true"></div>
     <div class="sleeve">
       <header class="catalog">
         <span>VRS–001</span>
@@ -47,7 +49,7 @@
           </div>
           <h1>A letra, <em>no tempo</em> da música.</h1>
           <p class="lede">
-            Um app pequeno e gratuito que mostra a letra sincronizada do que está tocando no Spotify,
+            Um app pequeno e gratuito que mostra a letra sincronizada do que está tocando no Spotify (ou no YouTube Music, no Windows),
             flutuando por cima de qualquer janela — do editor de código ao navegador.
           </p>
           <div class="cta" id="downloads">
@@ -58,26 +60,44 @@
             Mac com Intel? <a data-dl="mac-intel" href="https://github.com/luizfbalves/verso/releases/latest">Baixe esta versão</a>.
             Todas as versões em <a href="https://github.com/luizfbalves/verso/releases">Releases</a>.
           </p>
+          <div class="works-with">
+            <span class="works-label">Funciona com</span>
+            <img src="spotify.svg" alt="Spotify" width="87" height="26" />
+            <span class="works-yt"><img src="youtube.svg" alt="YouTube" width="94" height="21" /><span>Music, no Windows</span></span>
+          </div>
         </div>
 
         <figure class="demo" aria-label="Demonstração: o disco gira e a linha em destaque no selo avança, como a letra no app">
-          <div class="disc" aria-hidden="true">
-            <svg class="disc-grooves" viewBox="0 0 640 640">
-              <g fill="none" stroke="#efefe9" stroke-opacity=".08" stroke-width="2">
-                <circle cx="320" cy="320" r="300"/><circle cx="320" cy="320" r="282"/><circle cx="320" cy="320" r="264"/>
-                <circle cx="320" cy="320" r="246"/><circle cx="320" cy="320" r="228"/><circle cx="320" cy="320" r="210"/>
-                <circle cx="320" cy="320" r="192"/><circle cx="320" cy="320" r="174"/><circle cx="320" cy="320" r="156"/>
+          <div class="deck" id="deck">
+            <div class="disc" aria-hidden="true">
+              <svg class="disc-grooves" viewBox="0 0 640 640">
+                <g fill="none" stroke="#efefe9" stroke-opacity=".08" stroke-width="2">
+                  <circle cx="320" cy="320" r="300"/><circle cx="320" cy="320" r="282"/><circle cx="320" cy="320" r="264"/>
+                  <circle cx="320" cy="320" r="246"/><circle cx="320" cy="320" r="228"/><circle cx="320" cy="320" r="210"/>
+                  <circle cx="320" cy="320" r="192"/><circle cx="320" cy="320" r="174"/><circle cx="320" cy="320" r="156"/>
+                </g>
+                <g fill="none" stroke="#efefe9" stroke-linecap="round" stroke-width="3">
+                  <circle cx="320" cy="320" r="291" stroke-opacity=".16" stroke-dasharray="120 1709"/>
+                  <circle cx="320" cy="320" r="237" stroke-opacity=".12" stroke-dasharray="70 1419" stroke-dashoffset="-700"/>
+                  <circle cx="320" cy="320" r="183" stroke-opacity=".14" stroke-dasharray="90 1060" stroke-dashoffset="-300"/>
+                </g>
+              </svg>
+              <div class="disc-label"><div class="label-window"><div class="label-track" id="label-track"></div></div></div>
+            </div>
+            <svg class="tonearm" viewBox="0 0 440 440" aria-hidden="true">
+              <g class="arm">
+                <line x1="396" y1="44" x2="405" y2="15" stroke="#2a2521" stroke-width="16" stroke-linecap="round"/>
+                <line x1="396" y1="44" x2="318" y2="300" stroke="#2a2521" stroke-width="9" stroke-linecap="round"/>
+                <line x1="396" y1="44" x2="318" y2="300" stroke="#e9e8e2" stroke-width="3.5" stroke-linecap="round"/>
+                <rect x="-9" y="-6" width="18" height="30" rx="2" fill="#2a2521" transform="translate(318 300) rotate(17)"/>
               </g>
-              <g fill="none" stroke="#efefe9" stroke-linecap="round" stroke-width="3">
-                <circle cx="320" cy="320" r="291" stroke-opacity=".16" stroke-dasharray="120 1709"/>
-                <circle cx="320" cy="320" r="237" stroke-opacity=".12" stroke-dasharray="70 1419" stroke-dashoffset="-700"/>
-                <circle cx="320" cy="320" r="183" stroke-opacity=".14" stroke-dasharray="90 1060" stroke-dashoffset="-300"/>
-              </g>
+              <circle cx="396" cy="44" r="20" fill="#e9e8e2" stroke="#2a2521" stroke-width="2.5"/>
+              <circle cx="396" cy="44" r="7" fill="#2a2521"/>
             </svg>
-            <div class="disc-label"><div class="label-window"><div class="label-track" id="label-track"></div></div></div>
           </div>
           <figcaption>
-            <span>Fig. 1</span> O disco gira, a letra avança: a linha atual ganha destaque e as outras esmaecem.
+            <p><span class="fig-no">Fig. 1</span> O disco gira, a letra avança: a linha atual ganha destaque e as outras esmaecem.</p>
+            <button class="deck-toggle" id="deck-toggle" type="button" hidden data-on="Pausar" data-off="Tocar">Pausar</button>
           </figcaption>
         </figure>
       </section>
@@ -85,7 +105,7 @@
       <section class="side" aria-labelledby="side-a">
         <h2 id="side-a"><span class="side-mark">Lado A</span> O que ele faz</h2>
         <ol class="tracklist">
-          <li><span class="no">01</span><span class="name">Sincroniza com o Spotify</span><span class="lead"></span><span class="meta">automático</span></li>
+          <li><span class="no">01</span><span class="name">Sincroniza com o Spotify</span><span class="lead"></span><span class="meta">e YouTube Music no Windows</span></li>
           <li><span class="no">02</span><span class="name">Fica por cima de todas as janelas</span><span class="lead"></span><span class="meta">sem roubar o clique</span></li>
           <li><span class="no">03</span><span class="name">Traduz a letra para português, inglês ou espanhol</span><span class="lead"></span><span class="meta">original, tradução ou os dois</span></li>
           <li><span class="no">04</span><span class="name">Cinco fontes, inclusive manuscrita</span><span class="lead"></span><span class="meta">Preferências</span></li>
@@ -113,7 +133,7 @@
             <ol class="steps">
               <li><span>Rode o instalador <code>.exe</code>.</span></li>
               <li><span>Se o SmartScreen avisar, clique em <strong>Mais informações</strong> e depois em <strong>Executar assim mesmo</strong>.</span></li>
-              <li><span>Toque algo no app do Spotify para Windows. A letra aparece sozinha.</span></li>
+              <li><span>Toque algo no app do Spotify para Windows ou no YouTube Music pelo navegador. A letra aparece sozinha.</span></li>
             </ol>
           </div>
         </div>
@@ -127,7 +147,7 @@
         </div>
         <div>
           <h4>Não é afiliado</h4>
-          <p>Spotify é marca da Spotify AB. Este é um projeto independente.</p>
+          <p>Spotify é marca da Spotify AB e YouTube Music é marca da Google LLC. Este é um projeto independente.</p>
           <p><a href="privacidade.html">Privacidade</a></p>
         </div>
         <div>

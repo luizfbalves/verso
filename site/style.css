@@ -27,8 +27,11 @@
   --r-pill: 999px;
 
   --ease-out: cubic-bezier(0.22, 0.8, 0.24, 1);
+  --ease-io: cubic-bezier(0.77, 0, 0.175, 1);
   --d-fast: 160ms;
+  --d-mark: 450ms;
   --d-line: 600ms;
+  --d-arm: 1100ms;
 }
 
 * { box-sizing: border-box; }
@@ -113,6 +116,28 @@ h1 {
   text-wrap: balance;
 }
 h1 em { font-style: italic; font-weight: 400; }
+/* Karaokê: main.js quebra o título em palavras e o marca-texto passa por elas no tempo;
+   no fim só "no tempo" continua marcado. */
+h1:has(.w) { isolation: isolate; }
+h1 .w { position: relative; }
+h1 .w::before {
+  content: "";
+  position: absolute;
+  inset: 0.1em -0.13em 0.02em;
+  z-index: -1;
+  background: var(--spot);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+h1 em .w::before { transform: scaleX(1); }
+@media (prefers-reduced-motion: no-preference) {
+  h1:not(.sing) em .w::before { transform: scaleX(0); }
+  h1.sing .w::before {
+    transform: scaleX(1);
+    transition: transform var(--t, 240ms) linear var(--d, 0ms), opacity 500ms var(--ease-out);
+  }
+  h1.settled .w:not(em .w)::before { opacity: 0; }
+}
 
 .lede { font-size: var(--t-md); line-height: 1.4; max-width: 34ch; margin: 0 0 calc(var(--s) * 4); color: var(--ink); }
 
@@ -139,12 +164,33 @@ h1 em { font-style: italic; font-weight: 400; }
 
 .fine { font-size: var(--t-sm); color: var(--muted); margin: calc(var(--s) * 2) 0 0; }
 
+/* Logos monocromáticas em tinta, como impressas no encarte (ambas as marcas permitem a versão de uma cor). */
+.works-with {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--s) * 1.5) calc(var(--s) * 3);
+  margin-top: calc(var(--s) * 4);
+  padding-top: calc(var(--s) * 2);
+  border-top: 1px solid oklch(0.2 0.012 60 / 0.25);
+}
+.works-label, .works-yt span {
+  font: 500 var(--t-xs) / 1 var(--f-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.works-with img { display: block; width: auto; }
+.works-with img[src$="spotify.svg"] { height: 26px; }
+.works-yt { display: inline-flex; align-items: center; gap: 10px; }
+.works-yt img { height: 21px; }
+
 /* ---- demo: o ícone animado; o selo repete a mecânica do app ---- */
+.deck { position: relative; width: min(100%, 440px); margin: 0 auto; }
 .disc {
   position: relative;
-  width: min(100%, 440px);
+  width: 100%;
   aspect-ratio: 1;
-  margin: 0 auto;
   overflow: hidden;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #3a3530, #15120f 80%);
@@ -160,6 +206,20 @@ h1 em { font-style: italic; font-weight: 400; }
 }
 .disc-grooves { position: absolute; inset: 0; width: 100%; height: 100%; animation: spin 1.8s linear infinite; }
 @keyframes spin { to { transform: rotate(1turn); } }
+/* Com JS, main.js dá a partida (e a parada) do disco. */
+html.js .disc-grooves { animation: none; }
+
+/* Braço da agulha: fora do disco (que corta o que passa da borda), girando em torno do pivô. */
+.tonearm { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }
+.arm {
+  transform-box: view-box;
+  transform-origin: 396px 44px;
+  filter: drop-shadow(0 2px 0 oklch(0.2 0.012 60 / 0.25));
+}
+html.js .deck:not(.playing) .arm { transform: rotate(-30deg); }
+@media (prefers-reduced-motion: no-preference) {
+  .arm { transition: transform var(--d-arm) var(--ease-io); }
+}
 .disc-label {
   container-type: inline-size;
   position: absolute;
@@ -187,12 +247,61 @@ h1 em { font-style: italic; font-weight: 400; }
 .label-bar.cur { height: 11.5cqw; opacity: 1; }
 
 figcaption {
-  margin-top: calc(var(--s) * 1.25);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: calc(var(--s) * 2);
+  margin-top: calc(var(--s) * 2);
   font-size: var(--t-xs);
   color: var(--muted);
   font-family: var(--f-mono);
 }
-figcaption span { color: var(--ink); font-weight: 500; margin-right: 6px; }
+figcaption p { margin: 0; max-width: 44ch; }
+.fig-no { color: var(--ink); font-weight: 500; margin-right: 6px; }
+.deck-toggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink);
+  font: 500 var(--t-xs) / 1 var(--f-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color var(--d-fast) var(--ease-out);
+}
+/* Ícone: pausa (duas barras) enquanto toca, play (triângulo) parado. */
+.deck-toggle::before {
+  content: "";
+  width: 8px;
+  height: 9px;
+  background: linear-gradient(to right, currentColor 35%, transparent 35% 65%, currentColor 65%);
+}
+.deck-toggle[data-state="off"]::before { background: currentColor; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.deck-toggle:hover { background: var(--paper-2); }
+.deck-toggle:active { transform: translateY(1px); }
+
+/* ---- barra de progresso: a página é a faixa, a rolagem é o tempo ---- */
+.playhead { display: none; }
+@supports (animation-timeline: scroll()) {
+  .playhead {
+    display: block;
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 10;
+    height: 3px;
+    background: var(--spot);
+    transform-origin: left;
+    animation: playhead linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes playhead { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
 /* ---- lados ---- */
 .side { padding: calc(var(--s) * 8) 0 calc(var(--s) * 4); border-bottom: 1px solid var(--rule); }
@@ -215,7 +324,9 @@ h2 {
 }
 
 .tracklist { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--rule); }
+.tracklist { isolation: isolate; }
 .tracklist li {
+  position: relative;
   display: grid;
   grid-template-columns: 3.2rem auto 1fr auto;
   align-items: baseline;
@@ -225,6 +336,25 @@ h2 {
   transition: background-color var(--d-fast) var(--ease-out);
 }
 .tracklist li:hover { background: oklch(0.63 0.19 33 / 0.16); }
+/* A faixa no meio da tela é a "linha atual": o marca-texto entra da esquerda, como no app. */
+.tracklist li::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--spot);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: opacity 220ms var(--ease-out), transform 0s 220ms;
+}
+.tracklist li.cur::before {
+  opacity: 1;
+  transform: scaleX(1);
+  transition: opacity 120ms linear, transform var(--d-mark) var(--ease-out);
+}
+.tracklist li.cur .no, .tracklist li.cur .meta { color: var(--ink); }
+.tracklist li.cur .lead { border-color: oklch(0.2 0.012 60 / 0.6); }
 .tracklist .no { font: 500 var(--t-sm) / 1 var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .tracklist .name { font-size: var(--t-md); font-family: var(--f-display); line-height: 1.25; }
 .tracklist .lead { border-bottom: 1.5px dotted oklch(0.2 0.012 60 / 0.4); transform: translateY(-5px); min-width: 16px; }
@@ -301,11 +431,13 @@ h4 { font: 500 var(--t-xs) / 1 var(--f-mono); letter-spacing: 0.1em; text-transf
   .tracklist li { grid-template-columns: 2.2rem 1fr; row-gap: 4px; }
   .tracklist .lead { display: none; }
   .tracklist .meta { grid-column: 2; text-align: left; white-space: normal; }
-  .disc { width: min(100%, 320px); }
+  .deck { width: min(100%, 320px); }
+  figcaption { flex-direction: column; }
   .btn { flex: 1 1 100%; justify-content: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .label-track, .label-bar, .btn, .tracklist li { transition: none; }
+  .label-track, .label-bar, .btn, .tracklist li, .tracklist li::before { transition: none; }
   .disc-grooves { animation: none; }
+  .playhead { display: none; }
 }
