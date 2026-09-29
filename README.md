@@ -1,20 +1,22 @@
 # Verso
 
-App gratuito para macOS e Windows que mostra a letra sincronizada da música que toca no Spotify, flutuando sobre qualquer janela.
+English | [Português](README.pt-BR.md)
 
-Site e downloads: https://luizfbalves.github.io/verso/ (English: https://luizfbalves.github.io/verso/en/)
+Free app for macOS and Windows that shows synced lyrics for the song playing on Spotify, floating over any window.
 
-## Desenvolvimento
+Website and downloads: https://luizfbalves.github.io/verso/en/ (Português: https://luizfbalves.github.io/verso/)
 
-Requer Node 22 e Rust estável.
+## Development
+
+Requires Node 22 and stable Rust.
 
 ```sh
 npm ci
-npm run tauri dev     # roda o app em modo dev
-npm run tauri build   # gera os instaladores em src-tauri/target/release/bundle
+npm run tauri dev     # runs the app in dev mode
+npm run tauri build   # builds the installers in src-tauri/target/release/bundle
 ```
 
-Releases saem pelo workflow [release.yml](.github/workflows/release.yml) ao publicar uma tag `v*`.
+Releases are produced by the [release.yml](.github/workflows/release.yml) workflow when a `v*` tag is pushed.
 
 ## Code signing policy
 
@@ -40,6 +42,6 @@ To do its job, Verso sends the following requests:
 
 No analytics or telemetry is collected.
 
-## Licença
+## License
 
 [MIT](LICENSE)
