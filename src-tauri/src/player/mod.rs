@@ -83,13 +83,14 @@ pub fn smtc_source(app_id: &str) -> Option<SmtcSource> {
 }
 
 /// Escolhe a sessão a sincronizar: a que está tocando ganha, e no empate o Spotify ganha.
-/// De navegador só vale faixa com álbum e duração: o YouTube comum não preenche o álbum
-/// (o "artista" é o canal), e sem duração não dá para achar a letra nem sincronizar.
+/// De navegador só vale faixa com artista e duração: sem duração não dá para achar a letra nem
+/// sincronizar. O álbum não é exigido porque o YouTube Music o deixa vazio em vídeos e em muitas
+/// faixas; a busca do LRCLIB casa pela duração, então um vídeo comum só fica sem letra.
 pub fn pick_smtc(candidates: Vec<(SmtcSource, NowPlaying)>) -> Option<NowPlaying> {
     candidates
         .into_iter()
         .filter(|(src, np)| {
-            *src == SmtcSource::Spotify || (!np.album.trim().is_empty() && !np.artist.trim().is_empty() && np.duration_ms > 0)
+            *src == SmtcSource::Spotify || (!np.artist.trim().is_empty() && np.duration_ms > 0)
         })
         .min_by_key(|(src, np)| (!np.is_playing, *src != SmtcSource::Spotify))
         .map(|(_, np)| np)
@@ -158,11 +159,17 @@ mod tests {
     }
 
     #[test]
-    fn pick_smtc_ignora_navegador_sem_album_ou_duracao() {
+    fn pick_smtc_ignora_navegador_sem_duracao() {
         use SmtcSource::*;
-        assert_eq!(pick_smtc(vec![(Browser, np("youtube", "", 1, true))]), None);
         assert_eq!(pick_smtc(vec![(Browser, np("sem timeline", "B", 0, true))]), None);
-        let got = pick_smtc(vec![(Browser, np("youtube", "", 1, true)), (Spotify, np("spotify", "", 0, false))]);
+        let got = pick_smtc(vec![(Browser, np("sem timeline", "B", 0, true)), (Spotify, np("spotify", "", 0, false))]);
         assert_eq!(got.unwrap().title, "spotify");
+    }
+
+    #[test]
+    fn pick_smtc_aceita_navegador_sem_album() {
+        // O YouTube Music manda o álbum vazio em vídeos e em muitas faixas.
+        let got = pick_smtc(vec![(SmtcSource::Browser, np("ytm", "", 217_741, true))]);
+        assert_eq!(got.unwrap().title, "ytm");
     }
 }
